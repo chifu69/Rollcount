@@ -1,19 +1,13 @@
-ROLL COUNT PWA v3
+ROLL COUNT PWA v4
 
-Files: index.html, styles.css, app.js, manifest.webmanifest, sw.js, icons.
-
-Changes in v3:
-- Compact inventory entry: no external roll-type title and no Area/Line labels.
-- Every roll type uses four equal count boxes.
-- Roll type appears inside each box as a light watermark/placeholder.
-- Report quantities are much larger and easier to read.
-- Scrap accepts large values (example: 5400).
-- Scrap color rule: 0 = GREEN; 1 or more = RED.
-- Share, Copy, PDF/Print, History, New Day/Clear and offline support retained.
-
-INSTALL ON IPHONE
-1. Host this folder on any HTTPS static website host.
-2. Open the URL in Safari.
-3. Share > Add to Home Screen > Open as Web App / Add.
-
-If updating an existing install, refresh/reopen once so the v3 service worker replaces the old cached version.
+Changes:
+- Compact entry cards now show a small roll type title above the four count boxes.
+- Add Roll Type button for future products such as 5.5/50.
+- New roll types are saved on the device and sorted automatically by the first number, then the second number.
+- Tap a small roll type title to edit or delete it.
+- Exact duplicate roll types are removed automatically.
+- Redesigned Roll Count Report with large, highly visible numbers.
+- Report only lists roll types with inventory.
+- Scrap = 0 displays green / GOOD. Scrap >= 1 displays red / SCRAP.
+- K1 OPERATIONS branding removed from the report.
+- Share, Copy, Print/PDF, History, and New Day/Clear remain available.

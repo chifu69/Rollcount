@@ -10,12 +10,11 @@
   <title>Roll Count</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <header class="app-header">
     <div>
-      <div class="eyebrow">K1 OPERATIONS</div>
       <h1>Roll Count</h1>
       <p id="dateLabel"></p>
     </div>
@@ -46,33 +45,48 @@
         <h2>Inventory Entry</h2>
         <p>Four quick count boxes per roll type.</p>
       </div>
+      <button class="small-add-btn" id="addRollBtn">+ Add Roll Type</button>
     </section>
 
     <div id="rollList" class="roll-list"></div>
 
     <section class="report-card" id="reportSection">
-      <div class="report-brand">
-        <div class="report-kicker">K1 OPERATIONS</div>
-        <div class="report-name">Daily Roll Inventory Report</div>
-        <div class="report-date" id="reportDate"></div>
-      </div>
-      <div class="report-title-row">
+      <div class="report-header-row">
         <div>
-          <div class="eyebrow dark">EMAIL-READY SUMMARY</div>
-          <h2>Inventory Summary</h2>
+          <h2 class="report-main-title">Roll Count Report</h2>
+          <div class="report-date" id="reportDate"></div>
         </div>
-        <span class="pill" id="reportCount">0 types</span>
+        <button class="report-print-btn" id="printTopBtn">Print / Save</button>
       </div>
-      <div id="summaryEmpty" class="empty-state">No rolls entered yet.</div>
-      <div id="summaryList" class="summary-list"></div>
-      <div class="report-metrics">
-        <div class="report-total"><span>Total Rolls</span><strong id="reportTotal">0</strong></div>
-        <div class="report-scrap"><span>Scrap</span><strong id="reportScrap" class="report-scrap-value good">0</strong></div>
+
+      <div class="report-hero-metrics">
+        <div class="hero-metric rolls">
+          <span>Total Rolls</span>
+          <strong id="reportTotal">0</strong>
+        </div>
+        <div class="hero-metric scrap good" id="reportScrapCard">
+          <span>Total Scrap</span>
+          <strong id="reportScrap">0</strong>
+          <b id="reportScrapWord">GOOD</b>
+        </div>
       </div>
+
+      <div class="report-table">
+        <div class="report-table-head"><span>Roll Count</span><span>Count</span></div>
+        <div id="summaryEmpty" class="empty-state">No rolls entered yet.</div>
+        <div id="summaryList" class="summary-list"></div>
+        <div class="report-table-total"><span>Total</span><strong id="reportTableTotal">0</strong></div>
+      </div>
+
+      <div class="scrap-report-row">
+        <div class="scrap-amount-box"><span>Scrap Amount</span><strong id="reportScrapBottom">0</strong></div>
+        <div class="scrap-state-box good" id="reportScrapState"><span id="scrapStateLabel">SCRAP = 0</span><strong id="scrapStateWord">GOOD</strong></div>
+      </div>
+
       <div class="action-grid">
         <button class="btn primary" id="shareBtn">Share Report</button>
         <button class="btn" id="copyBtn">Copy</button>
-        <button class="btn" id="printBtn">PDF / Print</button>
+        <button class="btn" id="printBtn">Export PDF / Print</button>
         <button class="btn danger" id="newDayBtn">New Day / Clear</button>
       </div>
     </section>
@@ -88,7 +102,23 @@
     <div id="historyList" class="history-list"></div>
   </dialog>
 
-  <script src="app.js?v=3"></script>
-  <script>document.getElementById('reportDate').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});</script>
+  <dialog id="rollTypeDialog">
+    <div class="dialog-head">
+      <div><div class="eyebrow">ROLL TYPE</div><h2 id="rollDialogTitle">Add Roll Type</h2></div>
+      <button class="icon-btn" id="closeRollDialog">Close</button>
+    </div>
+    <div class="roll-dialog-body">
+      <label for="rollTypeInput">Name / number</label>
+      <input id="rollTypeInput" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 5.5/50" />
+      <p class="dialog-help">It will be placed automatically in numerical order.</p>
+      <input type="hidden" id="editingRollType" />
+      <div class="dialog-actions">
+        <button class="btn primary" id="saveRollTypeBtn">Save Roll Type</button>
+        <button class="btn danger hidden" id="deleteRollTypeBtn">Delete</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js?v=4"></script>
 </body>
 </html>
