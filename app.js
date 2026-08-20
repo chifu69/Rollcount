@@ -24,13 +24,44 @@ function render(){ensureData();list.innerHTML=rollTypes.map(t=>{const d=data[t]|
 function inStock(){return rollTypes.map(t=>({type:t,total:totalFor(t)})).filter(x=>x.total>0)}
 function scrapState(v){return v===0?'good':'bad'}
 function updateScrapVisual(){const v=scrapN(),state=scrapState(v),input=$('#scrapInput'),badge=$('#scrapBadge'),metric=$('#scrapMetric');input.classList.remove('scrap-good','scrap-bad');input.classList.add(`scrap-${state}`);badge.className=`scrap-badge ${state}`;badge.textContent=v===0?'ZERO':'SCRAP';metric.className=`metric-value scrap-${state}-text`;metric.textContent=v.toLocaleString();}
-function updateSummary(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),ss=scrapState(sv);$('#typesInStock').textContent=rows.length;$('#grandTotal').textContent=gt.toLocaleString();$('#reportTotal').textContent=gt.toLocaleString();$('#reportTableTotal').textContent=gt.toLocaleString();$('#reportScrap').textContent=sv.toLocaleString();$('#reportScrapBottom').textContent=sv.toLocaleString();$('#summaryEmpty').style.display=rows.length?'none':'block';$('#summaryList').innerHTML=rows.map(x=>`<div class="summary-row"><span>${esc(x.type)}</span><strong>${x.total.toLocaleString()}</strong></div>`).join('');
-  const top=$('#reportScrapCard'),bottom=$('#reportScrapState');top.className=`hero-metric scrap ${ss}`;bottom.className=`scrap-state-box ${ss}`;$('#reportScrapWord').textContent=sv===0?'GOOD':'SCRAP';$('#scrapStateLabel').textContent=sv===0?'SCRAP = 0':`SCRAP = ${sv.toLocaleString()}`;$('#scrapStateWord').textContent=sv===0?'GOOD':'SCRAP';updateScrapVisual();}
+function updateSummary(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),ss=scrapState(sv);$('#typesInStock').textContent=rows.length;$('#grandTotal').textContent=gt.toLocaleString();$('#reportTotal').textContent=gt.toLocaleString();$('#reportTableTotal').textContent=gt.toLocaleString();$('#reportScrap').textContent=sv.toLocaleString();$('#summaryEmpty').style.display=rows.length?'none':'block';$('#summaryList').innerHTML=rows.map(x=>`<div class="summary-row"><span>${esc(x.type)}</span><strong>${x.total.toLocaleString()}</strong></div>`).join('');
+  const top=$('#reportScrapCard');top.className=`hero-metric scrap ${ss}`;updateScrapVisual();}
 function dateLong(){return new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}
-function reportText(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN();const divider='------------------------------';return ['ROLL COUNT REPORT',dateLong(),divider,...rows.map(x=>`${x.type.padEnd(12,' ')} ${String(x.total).padStart(3,' ')} rolls`),divider,`TOTAL ROLLS: ${gt}`,`SCRAP: ${sv.toLocaleString()}${sv===0?'  |  GOOD':'  |  SCRAP'}`].join('\n')}
+function reportText(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN();const divider='------------------------------';return ['ROLL COUNT REPORT',dateLong(),divider,...rows.map(x=>`${x.type.padEnd(12,' ')} ${String(x.total).padStart(3,' ')} rolls`),divider,`TOTAL ROLLS: ${gt}`,`SCRAP: ${sv.toLocaleString()}`].join('\n')}
+function reportRichHTML(){
+  const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),bad=sv>0;
+  const scrapBg=bad?'#fde8e7':'#e7f5eb',scrapInk=bad?'#b42318':'#14733b',scrapBorder=bad?'#df9b9b':'#afd0aa';
+  const bodyRows=rows.length?rows.map(x=>`<tr><td style="padding:10px 14px;border-top:1px solid #e2e7eb;font-family:Arial,sans-serif;font-size:17px;font-weight:700;color:#102b42;">${esc(x.type)}</td><td style="padding:8px 14px;border-top:1px solid #e2e7eb;border-left:1px solid #e2e7eb;text-align:center;font-family:Arial,sans-serif;font-size:28px;font-weight:900;color:#123b5d;">${x.total.toLocaleString()}</td></tr>`).join(''):`<tr><td colspan="2" style="padding:18px;text-align:center;color:#6b7c8a;font-family:Arial,sans-serif;">No rolls entered yet.</td></tr>`;
+  return `<div style="max-width:680px;background:#ffffff;padding:22px;border:1px solid #d5dee6;border-radius:18px;font-family:Arial,sans-serif;color:#102b42;">
+    <div style="margin-bottom:16px;"><div style="font-size:28px;line-height:1.1;font-weight:900;color:#123b5d;">ROLL COUNT REPORT</div><div style="margin-top:5px;font-size:14px;color:#6b7c8a;">${esc(dateLong())}</div></div>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;border-spacing:10px 0;margin:0 -10px 14px;width:calc(100% + 20px);"><tr>
+      <td style="width:50%;padding:18px;text-align:center;background:#f1f7ff;border:1.5px solid #b7d1ef;border-radius:14px;color:#0b4e9d;"><div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;">TOTAL ROLLS</div><div style="font-size:56px;line-height:1;font-weight:900;">${gt.toLocaleString()}</div></td>
+      <td style="width:50%;padding:18px;text-align:center;background:${scrapBg};border:1.5px solid ${scrapBorder};border-radius:14px;color:${scrapInk};"><div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;">SCRAP</div><div style="font-size:56px;line-height:1;font-weight:900;">${sv.toLocaleString()}</div></td>
+    </tr></table>
+    <table cellpadding="0" cellspacing="0" width="100%" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #d5dee6;border-radius:12px;overflow:hidden;">
+      <tr><th style="padding:11px 14px;background:#123b5d;color:#fff;text-align:left;font-size:12px;text-transform:uppercase;">ROLL COUNT</th><th style="padding:11px 14px;background:#123b5d;color:#fff;text-align:center;font-size:12px;text-transform:uppercase;border-left:1px solid #7992a7;">COUNT</th></tr>
+      ${bodyRows}
+      <tr><td style="padding:11px 14px;border-top:1px solid #d5dee6;background:#f6f9fc;font-size:14px;font-weight:900;color:#1557a5;text-transform:uppercase;">TOTAL</td><td style="padding:9px 14px;border-top:1px solid #d5dee6;border-left:1px solid #d5dee6;background:#f6f9fc;text-align:center;font-size:30px;font-weight:900;color:#1557a5;">${gt.toLocaleString()}</td></tr>
+    </table>
+  </div>`;
+}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove('show'),1800)}
-async function shareReport(){const text=reportText();try{if(navigator.share){await navigator.share({title:`Roll Count Report - ${dateLong()}`,text});}else{await navigator.clipboard.writeText(text);toast('Report copied')}}catch(e){if(e.name!=='AbortError')toast('Unable to share')}}
-async function copyReport(){try{await navigator.clipboard.writeText(reportText());toast('Report copied')}catch{const ta=document.createElement('textarea');ta.value=reportText();document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Report copied')}}
+async function shareReport(){const text=reportText();try{if(navigator.share){await navigator.share({title:`Roll Count Report - ${dateLong()}`,text});}else{await copyReport()}}catch(e){if(e.name!=='AbortError')toast('Unable to share')}}
+async function copyReport(){
+  const text=reportText(),html=reportRichHTML();
+  try{
+    if(navigator.clipboard&&window.ClipboardItem){
+      const item=new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})});
+      await navigator.clipboard.write([item]);
+      toast('Formatted report copied');
+      return;
+    }
+    throw new Error('Rich clipboard unavailable');
+  }catch(e){
+    try{await navigator.clipboard.writeText(text);toast('Copied as text (format not supported here)')}
+    catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copied as text')}
+  }
+}
 function newDay(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN();if(!rows.length&&sv===0){if(confirm('Everything is already clear. Start a fresh count?')){data=blank();scrap='';save();render()}return}if(!confirm(`Save today's count (${gt} rolls, scrap ${sv}) to history and clear all entries?`))return;history.unshift({ts:new Date().toISOString(),rows,grandTotal:gt,scrap:sv});history=history.slice(0,60);localStorage.setItem(HKEY,JSON.stringify(history));data=blank();scrap='';save();render();window.scrollTo({top:0,behavior:'smooth'});toast('New day started')}
 function renderHistory(){const box=$('#historyList');if(!history.length){box.innerHTML='<div class="empty-state">No saved days yet.</div>';return}box.innerHTML=history.map(h=>{const d=new Date(h.ts).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});const sv=Number.isFinite(h.scrap)?h.scrap:0;return `<div class="history-item"><div class="date">${esc(d)}</div><div class="meta">${h.rows.length} types • ${h.grandTotal} rolls • Scrap ${sv}</div><details><summary>View details</summary><div class="history-lines">${h.rows.map(r=>`${esc(r.type)} — <strong>${r.total}</strong>`).join('<br>')}<br><strong>Scrap — ${sv}</strong></div></details></div>`}).join('')}
 function openRollDialog(existing=''){const dlg=$('#rollTypeDialog');$('#editingRollType').value=existing;$('#rollTypeInput').value=existing;$('#rollDialogTitle').textContent=existing?'Edit Roll Type':'Add Roll Type';$('#deleteRollTypeBtn').classList.toggle('hidden',!existing);dlg.showModal();setTimeout(()=>$('#rollTypeInput').focus(),50)}

@@ -10,7 +10,7 @@
   <title>Roll Count</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <header class="app-header">
@@ -65,9 +65,8 @@
           <strong id="reportTotal">0</strong>
         </div>
         <div class="hero-metric scrap good" id="reportScrapCard">
-          <span>Total Scrap</span>
+          <span>Scrap</span>
           <strong id="reportScrap">0</strong>
-          <b id="reportScrapWord">GOOD</b>
         </div>
       </div>
 
@@ -78,14 +77,10 @@
         <div class="report-table-total"><span>Total</span><strong id="reportTableTotal">0</strong></div>
       </div>
 
-      <div class="scrap-report-row">
-        <div class="scrap-amount-box"><span>Scrap Amount</span><strong id="reportScrapBottom">0</strong></div>
-        <div class="scrap-state-box good" id="reportScrapState"><span id="scrapStateLabel">SCRAP = 0</span><strong id="scrapStateWord">GOOD</strong></div>
-      </div>
 
       <div class="action-grid">
         <button class="btn primary" id="shareBtn">Share Report</button>
-        <button class="btn" id="copyBtn">Copy</button>
+        <button class="btn" id="copyBtn">Copy Report</button>
         <button class="btn" id="printBtn">Export PDF / Print</button>
         <button class="btn danger" id="newDayBtn">New Day / Clear</button>
       </div>
@@ -119,6 +114,6 @@
     </div>
   </dialog>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
