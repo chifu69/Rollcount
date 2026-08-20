@@ -1,13 +1,9 @@
-ROLL COUNT PWA v4
+ROLL COUNT PWA v6
 
-Changes:
-- Compact entry cards now show a small roll type title above the four count boxes.
-- Add Roll Type button for future products such as 5.5/50.
-- New roll types are saved on the device and sorted automatically by the first number, then the second number.
-- Tap a small roll type title to edit or delete it.
-- Exact duplicate roll types are removed automatically.
-- Redesigned Roll Count Report with large, highly visible numbers.
-- Report only lists roll types with inventory.
-- Scrap = 0 displays green / GOOD. Scrap >= 1 displays red / SCRAP.
-- K1 OPERATIONS branding removed from the report.
-- Share, Copy, Print/PDF, History, and New Day/Clear remain available.
+Changes from v5:
+- Total Rolls and Scrap values in the visual report reduced by about 50%.
+- The same smaller Total Rolls / Scrap values are used in formatted Copy Report output.
+- Roll-count table is more compact horizontally, with less empty space between roll type and count.
+- Individual roll counts are larger and easier to read.
+- Existing custom roll types, automatic numeric sorting, formatted copy, scrap color logic, history, sharing, print/PDF, and New Day remain intact.
+- Service-worker cache bumped to v6 so GitHub Pages/PWA updates are easier to pick up.
