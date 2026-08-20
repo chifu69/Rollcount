@@ -26,28 +26,49 @@
     <section class="status-card">
       <div><span>Roll types in stock</span><strong id="typesInStock">0</strong></div>
       <div><span>Total rolls</span><strong id="grandTotal">0</strong></div>
+      <div><span>Scrap</span><strong class="metric-value scrap-good-text" id="scrapMetric">0</strong></div>
     </section>
 
-    <section class="section-head">
+    <section class="scrap-card">
+      <div class="scrap-copy">
+        <div class="eyebrow dark">DAILY QUALITY CHECK</div>
+        <h2>Scrap</h2>
+        <p>0 = green • 1 or more = red</p>
+      </div>
+      <div class="scrap-control">
+        <input id="scrapInput" class="scrap-good" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" aria-label="Scrap amount" placeholder="0" />
+        <span id="scrapBadge" class="scrap-badge good">ZERO</span>
+      </div>
+    </section>
+
+    <section class="section-head compact-head">
       <div>
         <h2>Inventory Entry</h2>
-        <p>Enter each count where you find the rolls. Totals update automatically.</p>
+        <p>Four quick count boxes per roll type.</p>
       </div>
     </section>
 
     <div id="rollList" class="roll-list"></div>
 
     <section class="report-card" id="reportSection">
+      <div class="report-brand">
+        <div class="report-kicker">K1 OPERATIONS</div>
+        <div class="report-name">Daily Roll Inventory Report</div>
+        <div class="report-date" id="reportDate"></div>
+      </div>
       <div class="report-title-row">
         <div>
-          <div class="eyebrow">EMAIL-READY REPORT</div>
+          <div class="eyebrow dark">EMAIL-READY SUMMARY</div>
           <h2>Inventory Summary</h2>
         </div>
         <span class="pill" id="reportCount">0 types</span>
       </div>
       <div id="summaryEmpty" class="empty-state">No rolls entered yet.</div>
       <div id="summaryList" class="summary-list"></div>
-      <div class="report-total"><span>Total Rolls</span><strong id="reportTotal">0</strong></div>
+      <div class="report-metrics">
+        <div class="report-total"><span>Total Rolls</span><strong id="reportTotal">0</strong></div>
+        <div class="report-scrap"><span>Scrap</span><strong id="reportScrap" class="report-scrap-value good">0</strong></div>
+      </div>
       <div class="action-grid">
         <button class="btn primary" id="shareBtn">Share Report</button>
         <button class="btn" id="copyBtn">Copy</button>
@@ -67,6 +88,7 @@
     <div id="historyList" class="history-list"></div>
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=3"></script>
+  <script>document.getElementById('reportDate').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});</script>
 </body>
 </html>
