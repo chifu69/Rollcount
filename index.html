@@ -10,7 +10,7 @@
   <title>Roll Count</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
   <header class="app-header">
@@ -78,6 +78,13 @@
       </div>
 
 
+
+      <section class="consumption-card">
+        <div class="consumption-head"><div><div class="eyebrow dark">ROLL CONSUMPTION</div><h2>Consumed Rolls</h2><p>Paste the source report. Roll Count extracts Roll Number, Designator and final status.</p></div><button class="small-add-btn" id="clearConsumptionBtn">Clear</button></div>
+        <textarea id="consumptionInput" rows="5" placeholder="Paste roll consumption lines here..."></textarea>
+        <div id="consumptionPreview" class="consumption-preview hidden"></div>
+      </section>
+
       <div class="action-grid">
         <button class="btn primary" id="shareBtn">Share Report</button>
         <button class="btn" id="copyBtn">Copy Report</button>
@@ -106,6 +113,7 @@
       <label for="rollTypeInput">Name / number</label>
       <input id="rollTypeInput" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 5.5/50" />
       <p class="dialog-help">It will be placed automatically in numerical order.</p>
+      <label class="laminate-option"><input id="laminatedInput" type="checkbox" /> <span>Laminated — add “L” automatically</span></label>
       <input type="hidden" id="editingRollType" />
       <div class="dialog-actions">
         <button class="btn primary" id="saveRollTypeBtn">Save Roll Type</button>
@@ -114,6 +122,6 @@
     </div>
   </dialog>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

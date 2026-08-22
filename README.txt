@@ -1,9 +1,8 @@
-ROLL COUNT PWA v6
+ROLL COUNT PWA v7
 
-Changes from v5:
-- Total Rolls and Scrap values in the visual report reduced by about 50%.
-- The same smaller Total Rolls / Scrap values are used in formatted Copy Report output.
-- Roll-count table is more compact horizontally, with less empty space between roll type and count.
-- Individual roll counts are larger and easier to read.
-- Existing custom roll types, automatic numeric sorting, formatted copy, scrap color logic, history, sharing, print/PDF, and New Day remain intact.
-- Service-worker cache bumped to v6 so GitHub Pages/PWA updates are easier to pick up.
+- Laminated option when adding/editing roll types; app appends L automatically.
+- Roll Consumption paste box parses Roll Number, Designator, and final status.
+- Automatic Consumed N roll/rolls.
+- Roll Consumption integrated into visual, copied, shared, and printed report using Roll Count design.
+- New Day clears Roll Consumption too.
+- Existing v6 inventory, scrap, history, sorting, sharing and report behavior preserved.
