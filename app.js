@@ -2,7 +2,7 @@ const DEFAULT_ROLL_TYPES=["5.3/36","5.3/43","6.3/36","6.35/43","6.5/43","6.5/36"
 const KEY='rollCount.current.v1',HKEY='rollCount.history.v1',SKEY='rollCount.scrap.v1',TKEY='rollCount.types.v2',CKEY='rollCount.consumption.v1';
 const $=s=>document.querySelector(s);const list=$('#rollList');
 function load(k,fallback){try{const v=localStorage.getItem(k);return v===null?fallback:JSON.parse(v)}catch{return fallback}}
-function normalizeType(s){return String(s||'').trim().replace(/\s+/g,'').replace(/\\/g,'/');}
+function normalizeType(s){let v=String(s||'').trim().replace(/\s+/g,'').replace(/\\/g,'/');if(!v.includes('/')){const m=v.match(/^([0-9]+(?:\.[0-9]+)?)\.([0-9]+(?:\.[0-9]+)?)([A-Za-z]*)$/);if(m)v=`${m[1]}/${m[2]}${m[3]}`;}return v;}
 function typeParts(type){const s=normalizeType(type);const m=s.match(/^([0-9]+(?:\.[0-9]+)?)\/([0-9]+(?:\.[0-9]+)?)(.*)$/i);if(!m)return [Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,s.toLowerCase()];return [Number(m[1]),Number(m[2]),m[3].toLowerCase()];}
 function sortTypes(arr){return [...new Set(arr.map(normalizeType).filter(Boolean))].sort((a,b)=>{const A=typeParts(a),B=typeParts(b);return A[0]-B[0]||A[1]-B[1]||A[2].localeCompare(B[2])||a.localeCompare(b,undefined,{numeric:true});});}
 let rollTypes=sortTypes(load(TKEY,DEFAULT_ROLL_TYPES));
