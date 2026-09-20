@@ -10,7 +10,7 @@
   <title>Roll Count</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="styles.css?v=7.1" />
 </head>
 <body>
   <header class="app-header">
@@ -96,6 +96,24 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+
+  <dialog id="shareDialog" class="share-dialog">
+    <div class="dialog-head">
+      <div><div class="eyebrow">SHARE REPORT</div><h2>Choose how to share</h2></div>
+      <button class="icon-btn" id="closeShareDialog">Close</button>
+    </div>
+    <div class="share-options">
+      <button class="share-option primary-share" id="emailShareBtn" type="button">
+        <strong>Outlook / Email</strong>
+        <span>Copies the formatted report, then opens your email app. Paste with Ctrl+V.</span>
+      </button>
+      <button class="share-option" id="systemShareBtn" type="button">
+        <strong>Windows Share</strong>
+        <span>Use the normal Windows sharing panel. This route uses plain text.</span>
+      </button>
+    </div>
+  </dialog>
+
   <dialog id="historyDialog">
     <div class="dialog-head">
       <div><div class="eyebrow">SAVED COUNTS</div><h2>History</h2></div>
@@ -122,6 +140,6 @@
     </div>
   </dialog>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=7.1"></script>
 </body>
 </html>

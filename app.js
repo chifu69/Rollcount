@@ -24,9 +24,60 @@ function render(){ensureData();list.innerHTML=rollTypes.map(t=>{const d=data[t]|
 function inStock(){return rollTypes.map(t=>({type:t,total:totalFor(t)})).filter(x=>x.total>0)}
 function scrapState(v){return v===0?'good':'bad'}
 function updateScrapVisual(){const v=scrapN(),state=scrapState(v),input=$('#scrapInput'),badge=$('#scrapBadge'),metric=$('#scrapMetric');input.classList.remove('scrap-good','scrap-bad');input.classList.add(`scrap-${state}`);badge.className=`scrap-badge ${state}`;badge.textContent=v===0?'ZERO':'SCRAP';metric.className=`metric-value scrap-${state}-text`;metric.textContent=v.toLocaleString();}
-function parseConsumption(text){return String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{const roll=(line.match(/Roll:\s*([^,]+)/i)||[])[1];const des=(line.match(/Designator:\s*([^,]+?)(?=\s+(?:has\b|was\b|is\b|will\b|$))/i)||[])[1]||(line.match(/Designator:\s*([^,]+)/i)||[])[1];if(!roll||!des)return null;const idx=line.toLowerCase().indexOf('designator:');let tail='';if(idx>=0){const after=line.slice(idx+'designator:'.length).trim();tail=after.slice(des.length).trim().replace(/^,\s*/,'');}return {roll:roll.trim(),designator:des.trim(),status:tail};}).filter(Boolean)}
-function consumptionText(){const items=parseConsumption(consumption);if(!items.length)return '';return ['ROLL CONSUMPTION',`Consumed ${items.length} ${items.length===1?'roll':'rolls'}.`,...items.map(x=>`${x.roll} | ${x.designator}${x.status?' | '+x.status:''}`)].join('\n')}
-function renderConsumption(){const items=parseConsumption(consumption),box=$('#consumptionPreview');if(!box)return;$('#consumptionInput').value=consumption;if(!items.length){box.classList.add('hidden');box.innerHTML='';return}box.classList.remove('hidden');box.innerHTML=`<div class="consumption-title">Roll Consumption</div><div class="consumption-count">Consumed ${items.length} ${items.length===1?'roll':'rolls'}.</div>${items.map(x=>`<div class="consumption-row"><div class="consumption-roll">${esc(x.roll)}</div><div class="consumption-meta">${esc(x.designator)}${x.status?' · '+esc(x.status):''}</div></div>`).join('')}`;}
+function extruderForRoll(roll){
+  const prefix=(String(roll||'').trim().match(/^(\d{2})/)||[])[1];
+  return ({'16':1,'26':2,'36':3,'46':4})[prefix]||null;
+}
+function sortConsumptionItems(items){
+  return items.map((x,i)=>({...x,extruder:extruderForRoll(x.roll),_sourceOrder:i}))
+    .sort((a,b)=>(a.extruder??99)-(b.extruder??99)||a._sourceOrder-b._sourceOrder);
+}
+function extruderInlineStyle(extruder){
+  return ({
+    1:'background:#dcecff;color:#155c9d;border:1px solid #bed8f4;',
+    2:'background:#fff0d8;color:#8a5a00;border:1px solid #f3d2a2;',
+    3:'background:#daf3e8;color:#14705a;border:1px solid #b8e1d2;',
+    4:'background:#eadffc;color:#5d3aa6;border:1px solid #d3c3f3;'
+  })[extruder]||'background:#eef2f5;color:#536472;border:1px solid #d5dee6;';
+}
+function parseConsumption(text){
+  const items=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{
+    const roll=(line.match(/Roll:\s*([^,]+)/i)||[])[1];
+    const des=(line.match(/Designator:\s*([^,]+?)(?=\s+(?:has\b|was\b|is\b|will\b|$))/i)||[])[1]||(line.match(/Designator:\s*([^,]+)/i)||[])[1];
+    if(!roll||!des)return null;
+    const idx=line.toLowerCase().indexOf('designator:');
+    let tail='';
+    if(idx>=0){
+      const after=line.slice(idx+'designator:'.length).trim();
+      tail=after.slice(des.length).trim().replace(/^,\s*/,'');
+    }
+    return {roll:roll.trim(),designator:des.trim(),status:tail};
+  }).filter(Boolean);
+  return sortConsumptionItems(items);
+}
+function consumptionText(){
+  const items=parseConsumption(consumption);
+  if(!items.length)return '';
+  return ['ROLL CONSUMPTION',`Consumed ${items.length} ${items.length===1?'roll':'rolls'}.`,
+    ...items.map(x=>`${x.roll}${x.extruder?` | Extruder ${x.extruder}`:''} | ${x.designator}${x.status?' | '+x.status:''}`)
+  ].join('\n');
+}
+function renderConsumption(){
+  const items=parseConsumption(consumption),box=$('#consumptionPreview');
+  if(!box)return;
+  $('#consumptionInput').value=consumption;
+  if(!items.length){box.classList.add('hidden');box.innerHTML='';return}
+  box.classList.remove('hidden');
+  box.innerHTML=`<div class="consumption-title">Roll Consumption</div>
+    <div class="consumption-count">Consumed ${items.length} ${items.length===1?'roll':'rolls'}.</div>
+    ${items.map(x=>`<div class="consumption-row">
+      <div class="consumption-roll-line">
+        <div class="consumption-roll">${esc(x.roll)}</div>
+        ${x.extruder?`<span class="extruder-badge extruder-${x.extruder}">Extruder ${x.extruder}</span>`:''}
+      </div>
+      <div class="consumption-meta">${esc(x.designator)}${x.status?' · '+esc(x.status):''}</div>
+    </div>`).join('')}`;
+}
 function updateSummary(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),ss=scrapState(sv);$('#typesInStock').textContent=rows.length;$('#grandTotal').textContent=gt.toLocaleString();$('#reportTotal').textContent=gt.toLocaleString();$('#reportTableTotal').textContent=gt.toLocaleString();$('#reportScrap').textContent=sv.toLocaleString();$('#summaryEmpty').style.display=rows.length?'none':'block';$('#summaryList').innerHTML=rows.map(x=>`<div class="summary-row"><span>${esc(x.type)}</span><strong>${x.total.toLocaleString()}</strong></div>`).join('');
   const top=$('#reportScrapCard');top.className=`hero-metric scrap ${ss}`;updateScrapVisual();}
 function dateLong(){return new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}
@@ -34,7 +85,18 @@ function reportText(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv
 function reportRichHTML(){
   const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),bad=sv>0;
   const scrapBg=bad?'#fde8e7':'#e7f5eb',scrapInk=bad?'#b42318':'#14733b',scrapBorder=bad?'#df9b9b':'#afd0aa';
-  const citems=parseConsumption(consumption);const consumptionHTML=citems.length?`<div style="margin-top:14px;border:1px solid #d5dee6;border-radius:12px;overflow:hidden;"><div style="padding:10px 12px;background:#123b5d;color:#fff;font-size:12px;font-weight:900;text-transform:uppercase;">ROLL CONSUMPTION</div><div style="padding:10px 12px;background:#f1f7ff;color:#0b4e9d;font-size:18px;font-weight:900;">Consumed ${citems.length} ${citems.length===1?'roll':'rolls'}.</div>${citems.map(x=>`<div style="padding:9px 12px;border-top:1px solid #e2e7eb;"><div style="font-weight:900;color:#123b5d;">${esc(x.roll)}</div><div style="margin-top:2px;font-size:13px;color:#687684;">${esc(x.designator)}${x.status?' · '+esc(x.status):''}</div></div>`).join('')}</div>`:'';
+  const citems=parseConsumption(consumption);
+  const consumptionHTML=citems.length?`<div style="margin-top:14px;border:1px solid #d5dee6;border-radius:12px;overflow:hidden;">
+    <div style="padding:10px 12px;background:#123b5d;color:#fff;font-size:12px;font-weight:900;text-transform:uppercase;">ROLL CONSUMPTION</div>
+    <div style="padding:10px 12px;background:#f1f7ff;color:#0b4e9d;font-size:18px;font-weight:900;">Consumed ${citems.length} ${citems.length===1?'roll':'rolls'}.</div>
+    ${citems.map(x=>`<div style="padding:9px 12px;border-top:1px solid #e2e7eb;">
+      <div style="font-weight:900;color:#123b5d;">
+        ${esc(x.roll)}
+        ${x.extruder?`<span style="display:inline-block;margin-left:8px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:800;vertical-align:2px;${extruderInlineStyle(x.extruder)}">Extruder ${x.extruder}</span>`:''}
+      </div>
+      <div style="margin-top:2px;font-size:13px;color:#687684;">${esc(x.designator)}${x.status?' · '+esc(x.status):''}</div>
+    </div>`).join('')}
+  </div>`:'';
   const bodyRows=rows.length?rows.map(x=>`<tr><td style="width:62%;padding:9px 12px;border-top:1px solid #e2e7eb;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#102b42;">${esc(x.type)}</td><td style="width:38%;padding:7px 10px;border-top:1px solid #e2e7eb;border-left:1px solid #e2e7eb;text-align:center;font-family:Arial,sans-serif;font-size:34px;line-height:1;font-weight:900;color:#123b5d;">${x.total.toLocaleString()}</td></tr>`).join(''):`<tr><td colspan="2" style="padding:18px;text-align:center;color:#6b7c8a;font-family:Arial,sans-serif;">No rolls entered yet.</td></tr>`;
   return `<div style="max-width:540px;background:#ffffff;padding:22px;border:1px solid #d5dee6;border-radius:18px;font-family:Arial,sans-serif;color:#102b42;">
     <div style="margin-bottom:16px;"><div style="font-size:28px;line-height:1.1;font-weight:900;color:#123b5d;">ROLL COUNT REPORT</div><div style="margin-top:5px;font-size:14px;color:#6b7c8a;">${esc(dateLong())}</div></div>
@@ -51,20 +113,88 @@ function reportRichHTML(){
   </div>`;
 }
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove('show'),1800)}
-async function shareReport(){const text=reportText();try{if(navigator.share){await navigator.share({title:`Roll Count Report - ${dateLong()}`,text});}else{await copyReport()}}catch(e){if(e.name!=='AbortError')toast('Unable to share')}}
-async function copyReport(){
+function showShareMenu(){
+  const dlg=$('#shareDialog');
+  if(dlg)dlg.showModal();
+}
+function closeShareMenu(){
+  const dlg=$('#shareDialog');
+  if(dlg&&dlg.open)dlg.close();
+}
+function legacyRichCopy(html){
+  const holder=document.createElement('div');
+  holder.setAttribute('contenteditable','true');
+  holder.style.position='fixed';
+  holder.style.left='-9999px';
+  holder.style.top='0';
+  holder.style.width='560px';
+  holder.innerHTML=html;
+  document.body.appendChild(holder);
+  const range=document.createRange();
+  range.selectNodeContents(holder);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  let ok=false;
+  try{ok=document.execCommand('copy')}catch{}
+  sel.removeAllRanges();
+  holder.remove();
+  return ok;
+}
+async function copyFormattedReport(silent=false){
   const text=reportText(),html=reportRichHTML();
   try{
     if(navigator.clipboard&&window.ClipboardItem){
-      const item=new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})});
+      const item=new ClipboardItem({
+        'text/html':new Blob([html],{type:'text/html'}),
+        'text/plain':new Blob([text],{type:'text/plain'})
+      });
       await navigator.clipboard.write([item]);
-      toast('Formatted report copied');
-      return;
+      if(!silent)toast('Formatted report copied');
+      return true;
     }
-    throw new Error('Rich clipboard unavailable');
+  }catch{}
+  if(legacyRichCopy(html)){
+    if(!silent)toast('Formatted report copied');
+    return true;
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    if(!silent)toast('Copied as text (rich format unavailable)');
+    return false;
+  }catch{
+    const ta=document.createElement('textarea');
+    ta.value=text;
+    ta.style.position='fixed';
+    ta.style.left='-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    if(!silent)toast('Copied as text');
+    return false;
+  }
+}
+async function copyReport(){return copyFormattedReport(false)}
+async function emailReport(){
+  const copiedRich=await copyFormattedReport(true);
+  closeShareMenu();
+  const subject=encodeURIComponent(`Roll Count Report - ${dateLong()}`);
+  const fallbackBody=copiedRich?'':`&body=${encodeURIComponent(reportText())}`;
+  window.location.href=`mailto:?subject=${subject}${fallbackBody}`;
+  if(copiedRich)setTimeout(()=>toast('Formatted report copied — paste it into Outlook with Ctrl+V'),250);
+}
+async function systemShareReport(){
+  closeShareMenu();
+  const text=reportText();
+  try{
+    if(navigator.share){
+      await navigator.share({title:`Roll Count Report - ${dateLong()}`,text});
+    }else{
+      await copyFormattedReport(false);
+    }
   }catch(e){
-    try{await navigator.clipboard.writeText(text);toast('Copied as text (format not supported here)')}
-    catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copied as text')}
+    if(e.name!=='AbortError')toast('Unable to share');
   }
 }
 function newDay(){const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN();if(!rows.length&&sv===0){if(confirm('Everything is already clear. Start a fresh count?')){data=blank();scrap='';consumption='';save();render()}return}if(!confirm(`Save today's count (${gt} rolls, scrap ${sv}) to history and clear all entries?`))return;history.unshift({ts:new Date().toISOString(),rows,grandTotal:gt,scrap:sv});history=history.slice(0,60);localStorage.setItem(HKEY,JSON.stringify(history));data=blank();scrap='';consumption='';save();render();window.scrollTo({top:0,behavior:'smooth'});toast('New day started')}
@@ -78,7 +208,8 @@ function saveRollType(){const oldType=$('#editingRollType').value;let newType=no
 function deleteRollType(){const type=$('#editingRollType').value;if(!type)return;const total=totalFor(type);if(total>0&&!confirm(`${type} currently has ${total} rolls entered. Delete this roll type and its counts?`))return;if(total===0&&!confirm(`Delete ${type}?`))return;rollTypes=rollTypes.filter(t=>t!==type);delete data[type];save();closeRollDialog();render();toast('Roll type deleted')}
 $('#consumptionInput').addEventListener('input',e=>{consumption=e.target.value;save();renderConsumption()});$('#clearConsumptionBtn').addEventListener('click',()=>{consumption='';save();renderConsumption();toast('Roll consumption cleared')});
 $('#scrapInput').addEventListener('input',e=>{let v=e.target.value.replace(/\D/g,'').slice(0,7);e.target.value=v;scrap=v;save();updateSummary()});
-$('#shareBtn').addEventListener('click',shareReport);$('#copyBtn').addEventListener('click',copyReport);$('#printBtn').addEventListener('click',()=>window.print());$('#printTopBtn').addEventListener('click',()=>window.print());$('#newDayBtn').addEventListener('click',newDay);$('#historyBtn').addEventListener('click',()=>$('#historyDialog').showModal());$('#closeHistory').addEventListener('click',()=>$('#historyDialog').close());
+$('#shareBtn').addEventListener('click',showShareMenu);$('#copyBtn').addEventListener('click',copyReport);$('#printBtn').addEventListener('click',()=>window.print());$('#printTopBtn').addEventListener('click',()=>window.print());$('#newDayBtn').addEventListener('click',newDay);$('#historyBtn').addEventListener('click',()=>$('#historyDialog').showModal());$('#closeHistory').addEventListener('click',()=>$('#historyDialog').close());
+$('#emailShareBtn').addEventListener('click',emailReport);$('#systemShareBtn').addEventListener('click',systemShareReport);$('#closeShareDialog').addEventListener('click',closeShareMenu);
 $('#addRollBtn').addEventListener('click',()=>openRollDialog());$('#closeRollDialog').addEventListener('click',closeRollDialog);$('#saveRollTypeBtn').addEventListener('click',saveRollType);$('#deleteRollTypeBtn').addEventListener('click',deleteRollType);$('#rollTypeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveRollType()}});
 $('#dateLabel').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});$('#reportDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 render();
