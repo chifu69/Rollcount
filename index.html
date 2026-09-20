@@ -10,15 +10,20 @@
   <title>Roll Count</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="styles.css?v=7.1" />
+  <link rel="stylesheet" href="styles.css?v=7.3.2" />
 </head>
 <body>
   <header class="app-header">
     <div>
-      <h1>Roll Count</h1>
+      <h1>Roll Count <span class="build-badge">v7.3.2</span></h1>
       <p id="dateLabel"></p>
     </div>
-    <button class="icon-btn" id="historyBtn" aria-label="History">History</button>
+    <div class="header-actions">
+      <span class="auto-shift-badge" id="autoShiftBadge">Shift … · Auto</span>
+      <select id="shiftSelect" class="hidden" aria-hidden="true"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
+      <button type="button" class="shared-status checking shared-status-button" id="sharedStatus">Shared Data…</button>
+      <button class="icon-btn" id="historyBtn" aria-label="Shared History">Shared History</button>
+    </div>
   </header>
 
   <main>
@@ -86,10 +91,11 @@
       </section>
 
       <div class="action-grid">
-        <button class="btn primary" id="shareBtn">Share Report</button>
+        <button class="btn primary save-report-btn" id="saveReportBtn">Save</button>
+        <button class="btn" id="shareBtn">Share Report</button>
         <button class="btn" id="copyBtn">Copy Report</button>
         <button class="btn" id="printBtn">Export PDF / Print</button>
-        <button class="btn danger" id="newDayBtn">New Day / Clear</button>
+        <button class="btn danger clear-report-btn" id="newDayBtn">New Day / Clear</button>
       </div>
     </section>
   </main>
@@ -105,7 +111,7 @@
     <div class="share-options">
       <button class="share-option primary-share" id="emailShareBtn" type="button">
         <strong>Outlook / Email</strong>
-        <span>Copies the formatted report, then opens your email app. Paste with Ctrl+V.</span>
+        <span>Opens a new Outlook draft with the formatted report already in the message body.</span>
       </button>
       <button class="share-option" id="systemShareBtn" type="button">
         <strong>Windows Share</strong>
@@ -114,12 +120,32 @@
     </div>
   </dialog>
 
-  <dialog id="historyDialog">
+  <dialog id="historyDialog" class="history-dialog">
     <div class="dialog-head">
-      <div><div class="eyebrow">SAVED COUNTS</div><h2>History</h2></div>
+      <div><div class="eyebrow">SHARED DATA</div><h2>Roll Count History</h2></div>
       <button class="icon-btn" id="closeHistory">Close</button>
     </div>
-    <div id="historyList" class="history-list"></div>
+    <div class="history-tabs">
+      <button class="history-tab active" id="rollCountHistoryTab" type="button">Roll Count</button>
+      <button class="history-tab" id="consumptionHistoryTab" type="button">Roll Consumption</button>
+    </div>
+    <section id="rollCountHistoryPanel" class="history-panel">
+      <p class="dialog-help">Snapshots saved by date and shift.</p>
+      <div id="sharedRollCountHistory" class="history-list"><div class="empty-state">Loading shared history…</div></div>
+    </section>
+    <section id="consumptionHistoryPanel" class="history-panel hidden">
+      <div class="history-filters">
+        <label>Month<input type="month" id="historyMonth" /></label>
+        <label>Shift<select id="historyShift"><option value="">All</option><option>A</option><option>B</option><option>C</option><option>D</option></select></label>
+        <label>Extruder<select id="historyExtruder"><option value="">All</option><option value="1">Extruder 1</option><option value="2">Extruder 2</option><option value="3">Extruder 3</option><option value="4">Extruder 4</option></select></label>
+        <button class="btn primary history-refresh" id="refreshConsumptionHistory" type="button">Run Report</button>
+      </div>
+      <div id="consumptionHistorySummary" class="consumption-history-summary"></div>
+      <div id="sharedConsumptionHistory" class="history-list"><div class="empty-state">Choose filters and run report.</div></div>
+      <div class="dialog-actions history-report-actions">
+        <button class="btn" id="copyConsumptionHistory" type="button">Copy Report</button>
+      </div>
+    </section>
   </dialog>
 
   <dialog id="rollTypeDialog">
@@ -140,6 +166,26 @@
     </div>
   </dialog>
 
-  <script src="app.js?v=7.1"></script>
+  <dialog id="teamsSetupDialog" class="teams-setup-dialog">
+    <div class="dialog-head">
+      <div><div class="eyebrow">MICROSOFT 365</div><h2>Connect Teams Shared Data</h2></div>
+      <button class="icon-btn" id="closeTeamsSetup">Close</button>
+    </div>
+    <div class="teams-setup-body">
+      <p class="dialog-help">GitHub/mobile uses Microsoft Graph. Enter the Microsoft Entra Application (Client) ID supplied by IT, then paste the <strong>Copy link</strong> URL for the <strong>Shared Data</strong> folder in Teams/SharePoint.</p>
+      <label>Application (Client) ID<input id="teamsClientId" type="text" autocomplete="off" placeholder="00000000-0000-0000-0000-000000000000" /></label>
+      <label>Shared Data folder link<input id="teamsSharedDataUrl" type="url" autocomplete="off" placeholder="https://...sharepoint.com/..." /></label>
+      <div class="dialog-actions">
+        <button class="btn primary" id="connectTeamsBtn" type="button">Save & Connect</button>
+        <button class="btn" id="clearTeamsSetupBtn" type="button">Clear setup</button>
+      </div>
+      <div class="teams-setup-note">Windows installed version continues to use the local OneDrive/Teams bridge automatically. This setup is for GitHub Pages/mobile/browser use.</div>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.1/lib/msal-browser.min.js" crossorigin="anonymous"></script>
+  <script src="teams-config.js?v=7.3.2"></script>
+  <script src="teams-graph.js?v=7.3.2"></script>
+  <script src="app.js?v=7.3.2"></script>
 </body>
 </html>
