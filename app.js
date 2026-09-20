@@ -352,10 +352,17 @@ function reportText(){
   const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),info=currentShiftInfo(),sh=info?.code||shift,divider='------------------------------',ct=consumptionText();
   return ['ROLL COUNT REPORT',`${dateLong()} • Shift ${sh}`,divider,...rows.map(x=>`${x.type.padEnd(12,' ')} ${String(x.total).padStart(3,' ')} rolls`),divider,`TOTAL ROLLS: ${gt}`,`SCRAP: ${sv.toLocaleString()}`,...(ct?['',ct]:[])].join('\n');
 }
+function isMobileReportLayout(){
+  const ua=(navigator.userAgent||'');
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(ua)||(window.matchMedia&&window.matchMedia('(max-width:700px)').matches);
+}
 function reportRichHTML(){
-  const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),bad=sv>0,citems=parseConsumption(consumption),info=currentShiftInfo(),sh=info?.code||shift;
+  const rows=inStock(),gt=rows.reduce((s,x)=>s+x.total,0),sv=scrapN(),bad=sv>0,citems=parseConsumption(consumption),info=currentShiftInfo(),sh=info?.code||shift,mobile=isMobileReportLayout();
   const scrapBg=bad?'#fde8e7':'#e7f5eb',scrapInk=bad?'#b42318':'#14733b',scrapBorder=bad?'#df9b9b':'#afd0aa';
-  const bodyRows=rows.length?rows.map(x=>`<tr><td style="padding:5px 10px;border-top:1px solid #e2e7eb;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#102b42;">${esc(x.type)}</td><td style="padding:5px 10px;border-top:1px solid #e2e7eb;border-left:1px solid #e2e7eb;text-align:center;font-family:Arial,sans-serif;font-size:22px;font-weight:900;color:#123b5d;">${x.total.toLocaleString()}</td></tr>`).join(''):`<tr><td colspan="2" style="padding:12px;text-align:center;color:#6b7c8a;font-family:Arial,sans-serif;">No rolls entered yet.</td></tr>`;
+  const bodyRows=rows.length?rows.map(x=>mobile
+    ?`<tr><td style="padding:14px 12px;border-top:1px solid #e2e7eb;font-family:Arial,sans-serif;font-size:22px;font-weight:800;color:#102b42;">${esc(x.type)}</td><td style="width:38%;padding:11px 10px;border-top:1px solid #e2e7eb;border-left:1px solid #e2e7eb;text-align:center;font-family:Arial,sans-serif;font-size:38px;line-height:1;font-weight:900;color:#123b5d;">${x.total.toLocaleString()}</td></tr>`
+    :`<tr><td style="padding:5px 10px;border-top:1px solid #e2e7eb;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#102b42;">${esc(x.type)}</td><td style="padding:5px 10px;border-top:1px solid #e2e7eb;border-left:1px solid #e2e7eb;text-align:center;font-family:Arial,sans-serif;font-size:22px;font-weight:900;color:#123b5d;">${x.total.toLocaleString()}</td></tr>`).join('')
+    :`<tr><td colspan="2" style="padding:12px;text-align:center;color:#6b7c8a;font-family:Arial,sans-serif;">No rolls entered yet.</td></tr>`;
   const consumptionRows=citems.map(x=>`<tr>
     <td style="padding:5px 7px;border-top:1px solid #e2e7eb;font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:#123b5d;white-space:nowrap;">${esc(x.roll)}</td>
     <td style="padding:5px 7px;border-top:1px solid #e2e7eb;text-align:center;font-family:Arial,sans-serif;font-size:11px;font-weight:800;white-space:nowrap;"><span style="display:inline-block;padding:2px 6px;border-radius:9px;${extruderInlineStyle(x.extruder)}">${x.extruder?`Extruder ${x.extruder}`:'—'}</span></td>
@@ -367,6 +374,20 @@ function reportRichHTML(){
     <tr><td style="padding:5px 7px;background:#f3f7fb;font-family:Arial,sans-serif;font-size:10px;font-weight:900;color:#536472;">ROLL</td><td style="padding:5px 7px;background:#f3f7fb;font-family:Arial,sans-serif;font-size:10px;font-weight:900;color:#536472;text-align:center;">SOURCE</td><td style="padding:5px 7px;background:#f3f7fb;font-family:Arial,sans-serif;font-size:10px;font-weight:900;color:#536472;">DESIGNATOR</td><td style="padding:5px 7px;background:#f3f7fb;font-family:Arial,sans-serif;font-size:10px;font-weight:900;color:#536472;">STATUS</td></tr>
     ${consumptionRows}
   </table>`:'';
+  if(mobile){
+    return `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;max-width:700px;border-collapse:collapse;background:#ffffff;border:1px solid #d5dee6;font-family:Arial,sans-serif;color:#102b42;">
+      <tr><td style="padding:24px 20px 14px 20px;"><div style="font-size:34px;line-height:1.08;font-weight:900;color:#123b5d;letter-spacing:-.4px;">ROLL COUNT REPORT</div><div style="margin-top:8px;font-size:17px;color:#6b7c8a;">${esc(dateLong())} &nbsp;•&nbsp; Shift ${esc(sh)}</div></td></tr>
+      <tr><td style="padding:0 18px 18px 18px;"><table role="presentation" cellpadding="0" cellspacing="7" width="100%" style="width:100%;"><tr>
+        <td style="width:50%;padding:14px 10px;text-align:center;background:#f1f7ff;border:1.5px solid #b7d1ef;color:#0b4e9d;"><div style="font-size:14px;font-weight:900;">TOTAL ROLLS</div><div style="margin-top:3px;font-size:38px;line-height:1;font-weight:900;">${gt.toLocaleString()}</div></td>
+        <td style="width:50%;padding:14px 10px;text-align:center;background:${scrapBg};border:1.5px solid ${scrapBorder};color:${scrapInk};"><div style="font-size:14px;font-weight:900;">SCRAP</div><div style="margin-top:3px;font-size:38px;line-height:1;font-weight:900;">${sv.toLocaleString()}</div></td>
+      </tr></table></td></tr>
+      <tr><td style="padding:0 20px 20px 20px;"><table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;border-collapse:collapse;border:1px solid #d5dee6;">
+        <tr><td style="padding:11px 12px;background:#b9daf4;color:#203342;font-size:15px;font-weight:900;">ROLL COUNT</td><td style="width:38%;padding:11px 10px;background:#b9daf4;color:#203342;font-size:15px;font-weight:900;text-align:center;border-left:1px solid #8eabc2;">COUNT</td></tr>
+        ${bodyRows}
+        <tr><td style="padding:12px;border-top:1px solid #d5dee6;background:#f6f9fc;font-size:15px;font-weight:900;color:#1557a5;">TOTAL</td><td style="padding:10px;border-top:1px solid #d5dee6;border-left:1px solid #d5dee6;background:#f6f9fc;text-align:center;font-size:40px;line-height:1;font-weight:900;color:#1557a5;">${gt.toLocaleString()}</td></tr>
+      </table>${consumptionHTML}</td></tr>
+    </table>`;
+  }
   return `<table role="presentation" cellpadding="0" cellspacing="0" width="620" style="width:620px;max-width:620px;border-collapse:collapse;background:#ffffff;border:1px solid #d5dee6;font-family:Arial,sans-serif;color:#102b42;">
     <tr><td style="padding:14px 16px 8px 16px;"><div style="font-size:24px;line-height:1.1;font-weight:900;color:#123b5d;">ROLL COUNT REPORT</div><div style="margin-top:4px;font-size:13px;color:#6b7c8a;">${esc(dateLong())} &nbsp;•&nbsp; Shift ${esc(sh)}</div></td></tr>
     <tr><td style="padding:0 16px 10px 16px;"><table role="presentation" cellpadding="0" cellspacing="6" width="100%" style="width:100%;"><tr>

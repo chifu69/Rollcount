@@ -1,4 +1,10 @@
-ROLL COUNT v7.3.2 — GITHUB + MICROSOFT TEAMS / SHAREPOINT
+ROLL COUNT v7.3.3 — GITHUB + MICROSOFT TEAMS / SHAREPOINT
+
+MOBILE REPORT FIX v7.3.3
+- Restores the larger mobile Roll Count report layout: full-width card, large title, large Total Rolls/Scrap metrics, taller two-column Roll Count table, and large counts/total.
+- Keeps the compact Windows/desktop report unchanged.
+- Keeps the current Roll Consumption report layout unchanged.
+- Mobile/desktop report layout is selected automatically.
 
 WHAT THIS PACKAGE IS
 - Flat GitHub Pages/PWA package: upload the files in this ZIP to the ROOT of the Rollcount repository.
